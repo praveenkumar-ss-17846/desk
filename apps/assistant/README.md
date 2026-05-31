@@ -1,0 +1,41 @@
+# assistant
+
+My personal assistant — built as an **installable PWA** (Progressive Web App)
+so it can be developed entirely in the cloud and run on an iPhone with **no Mac
+and no App Store**.
+
+**Stack:** Vite + React + TypeScript + [`vite-plugin-pwa`](https://vite-pwa-org.netlify.app/).
+
+## Develop
+
+```bash
+cd apps/assistant
+npm install
+npm run dev      # local dev server with hot reload
+npm run build    # production build into dist/ (generates service worker)
+npm run preview  # preview the production build locally
+npm run icons    # regenerate PNG app icons from public/favicon.svg
+```
+
+## How it runs on the iPhone (no Mac needed)
+
+1. Push changes to GitHub.
+2. The repo-level workflow `.github/workflows/deploy-assistant.yml` builds this
+   app and publishes `dist/` to **GitHub Pages**.
+3. On the iPhone, open the Pages URL in **Safari** → Share → **Add to Home
+   Screen**. It then launches full-screen with its own icon and works offline.
+
+> One-time setup: in the GitHub repo, go to **Settings → Pages → Build and
+> deployment → Source: GitHub Actions**. The Pages URL will be
+> `https://<your-username>.github.io/desk/`.
+
+## Current features
+
+- Add / complete / delete tasks
+- Tasks persist locally (`localStorage`) and work offline
+- Installable, full-screen, iOS-safe-area aware
+
+## Notes
+
+- `vite.config.ts` sets `base` to `/desk/` in production for GitHub Pages.
+- PWA manifest and icons are configured in `vite.config.ts` and `public/`.

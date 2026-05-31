@@ -11,7 +11,7 @@ always have an obvious home.
 ```
 desk/
 ├── apps/        # User-facing applications (mobile, web, desktop)
-│   └── assistant-ios/   # iOS personal assistant app (stack TBD)
+│   └── assistant/       # Personal assistant — installable PWA for iPhone
 ├── services/    # Backend services and APIs
 ├── packages/    # Shared, reusable libraries used across projects
 ├── infra/       # Infrastructure-as-code, deployment, environment config
@@ -38,7 +38,7 @@ desk/
 
 | Project | Location | Status |
 | --- | --- | --- |
-| Personal assistant (iOS) | `apps/assistant-ios/` | Planned — structure reserved, stack TBD |
+| Personal assistant | `apps/assistant/` | In progress — PWA (React + Vite), installable on iPhone via Safari |
 
 ## Getting started
 
