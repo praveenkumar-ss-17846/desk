@@ -3,12 +3,14 @@ export type Task = {
   text: string
   done: boolean
   createdAt: number
+  dueAt?: number
 }
 
 export type Note = {
   id: string
   text: string
   updatedAt: number
+  pinned?: boolean
 }
 
-export type Tab = 'home' | 'tasks' | 'notes'
+export type Tab = 'home' | 'tasks' | 'notes' | 'search'

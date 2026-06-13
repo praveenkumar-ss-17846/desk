@@ -9,6 +9,7 @@ const TABS: { id: Tab; label: string; icon: string }[] = [
   { id: 'home', label: 'Home', icon: '⌂' },
   { id: 'tasks', label: 'Tasks', icon: '✓' },
   { id: 'notes', label: 'Notes', icon: '✎' },
+  { id: 'search', label: 'Search', icon: '⌕' },
 ]
 
 export function BottomNav({ active, onChange }: Props) {

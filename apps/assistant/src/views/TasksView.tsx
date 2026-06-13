@@ -1,35 +1,60 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import type { Task } from '../types'
+import { fromInputValue } from '../lib/date'
+import { TaskItem } from '../components/TaskItem'
 
 type Props = {
   tasks: Task[]
   setTasks: React.Dispatch<React.SetStateAction<Task[]>>
+  reminders: {
+    permission: NotificationPermission | 'unsupported'
+    requestPermission: () => void
+  }
 }
 
-export function TasksView({ tasks, setTasks }: Props) {
+// Open tasks first (soonest due date first, undated last), completed last.
+function sortTasks(a: Task, b: Task) {
+  if (a.done !== b.done) return a.done ? 1 : -1
+  if (a.done) return b.createdAt - a.createdAt
+  if (a.dueAt && b.dueAt) return a.dueAt - b.dueAt
+  if (a.dueAt) return -1
+  if (b.dueAt) return 1
+  return b.createdAt - a.createdAt
+}
+
+export function TasksView({ tasks, setTasks, reminders }: Props) {
   const [draft, setDraft] = useState('')
+  const [due, setDue] = useState('')
+
+  const sorted = useMemo(() => [...tasks].sort(sortTasks), [tasks])
+  const remaining = tasks.filter((t) => !t.done).length
+  const hasDueDates = tasks.some((t) => t.dueAt && !t.done)
 
   function addTask() {
     const text = draft.trim()
     if (!text) return
     setTasks((prev) => [
-      { id: crypto.randomUUID(), text, done: false, createdAt: Date.now() },
+      {
+        id: crypto.randomUUID(),
+        text,
+        done: false,
+        createdAt: Date.now(),
+        dueAt: fromInputValue(due),
+      },
       ...prev,
     ])
     setDraft('')
+    setDue('')
   }
 
-  function toggleTask(id: string) {
+  const toggle = (id: string) =>
     setTasks((prev) =>
       prev.map((t) => (t.id === id ? { ...t, done: !t.done } : t)),
     )
-  }
-
-  function removeTask(id: string) {
+  const remove = (id: string) =>
     setTasks((prev) => prev.filter((t) => t.id !== id))
-  }
-
-  const remaining = tasks.filter((t) => !t.done).length
+  const update = (id: string, patch: Partial<Task>) =>
+    setTasks((prev) => prev.map((t) => (t.id === id ? { ...t, ...patch } : t)))
 
   return (
     <section className="view">
@@ -44,8 +69,14 @@ export function TasksView({ tasks, setTasks }: Props) {
         </p>
       </header>
 
+      {hasDueDates && reminders.permission === 'default' && (
+        <button className="banner" onClick={reminders.requestPermission}>
+          🔔 Enable reminders for tasks with due dates
+        </button>
+      )}
+
       <form
-        className="composer"
+        className="composer composer-column"
         onSubmit={(e) => {
           e.preventDefault()
           addTask()
@@ -59,33 +90,32 @@ export function TasksView({ tasks, setTasks }: Props) {
           aria-label="New task"
           autoComplete="off"
         />
-        <button className="composer-btn" type="submit" aria-label="Add task">
-          +
-        </button>
+        <div className="composer-row">
+          <input
+            className="composer-input composer-date"
+            type="datetime-local"
+            value={due}
+            onChange={(e) => setDue(e.target.value)}
+            aria-label="Due date (optional)"
+          />
+          <button className="composer-btn-wide" type="submit">
+            Add task
+          </button>
+        </div>
       </form>
 
       <ul className="list">
         {tasks.length === 0 && (
           <li className="empty">Add your first task above.</li>
         )}
-        {tasks.map((task) => (
-          <li key={task.id} className={`task ${task.done ? 'done' : ''}`}>
-            <label className="task-label">
-              <input
-                type="checkbox"
-                checked={task.done}
-                onChange={() => toggleTask(task.id)}
-              />
-              <span className="task-text">{task.text}</span>
-            </label>
-            <button
-              className="icon-btn"
-              onClick={() => removeTask(task.id)}
-              aria-label="Delete task"
-            >
-              ×
-            </button>
-          </li>
+        {sorted.map((task) => (
+          <TaskItem
+            key={task.id}
+            task={task}
+            onToggle={toggle}
+            onDelete={remove}
+            onUpdate={update}
+          />
         ))}
       </ul>
     </section>

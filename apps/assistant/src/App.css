@@ -90,11 +90,38 @@
   color: var(--text-dim);
 }
 
+/* ---- Banner (e.g. enable reminders) ---- */
+.banner {
+  width: 100%;
+  text-align: left;
+  background: var(--accent-soft);
+  color: var(--text);
+  border: 1px solid var(--surface-2);
+  border-radius: 12px;
+  padding: 12px 14px;
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 14px;
+  cursor: pointer;
+}
+
 /* ---- Composer (shared by tasks + notes) ---- */
 .composer {
   display: flex;
   gap: 10px;
   margin-bottom: 18px;
+}
+
+.composer-row {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.composer-date {
+  flex: 1;
+  min-width: 0;
+  color-scheme: light dark;
 }
 
 .composer-column {
@@ -199,6 +226,13 @@
   flex: 0 0 auto;
 }
 
+.task-main {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
 .task-text {
   font-size: 16px;
 }
@@ -206,6 +240,71 @@
 .task.done .task-text {
   text-decoration: line-through;
   color: var(--text-dim);
+}
+
+/* Due-date pill */
+.due {
+  align-self: flex-start;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--surface-2);
+  color: var(--text-dim);
+}
+
+.due-overdue {
+  background: rgba(229, 56, 78, 0.16);
+  color: var(--danger);
+}
+
+.due-today {
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+/* ---- Inline edit form ---- */
+.task.editing,
+.note.editing {
+  display: block;
+}
+
+.edit-form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.edit-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.text-btn {
+  border: none;
+  background: transparent;
+  color: var(--text-dim);
+  font-size: 15px;
+  font-weight: 600;
+  padding: 8px 14px;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.text-btn.primary {
+  background: var(--accent);
+  color: #fff;
+}
+
+/* ---- Search section headings ---- */
+.section-title {
+  font-size: 14px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-dim);
+  margin: 18px 0 10px;
 }
 
 .note-body {
@@ -241,6 +340,14 @@
 
 .icon-btn:active {
   background: var(--accent-soft);
+}
+
+.icon-btn.active {
+  color: var(--accent);
+}
+
+.note.pinned {
+  border-color: var(--accent);
 }
 
 /* ---- Bottom navigation ---- */

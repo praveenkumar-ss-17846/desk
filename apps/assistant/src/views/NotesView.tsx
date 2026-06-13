@@ -1,22 +1,21 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import type { Note } from '../types'
+import { NoteItem } from '../components/NoteItem'
 
 type Props = {
   notes: Note[]
   setNotes: React.Dispatch<React.SetStateAction<Note[]>>
 }
 
-function formatDate(ts: number) {
-  return new Date(ts).toLocaleDateString(undefined, {
-    month: 'short',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-  })
+// Pinned notes first, then most recently updated.
+function sortNotes(a: Note, b: Note) {
+  if (!!a.pinned !== !!b.pinned) return a.pinned ? -1 : 1
+  return b.updatedAt - a.updatedAt
 }
 
 export function NotesView({ notes, setNotes }: Props) {
   const [draft, setDraft] = useState('')
+  const sorted = useMemo(() => [...notes].sort(sortNotes), [notes])
 
   function addNote() {
     const text = draft.trim()
@@ -28,9 +27,10 @@ export function NotesView({ notes, setNotes }: Props) {
     setDraft('')
   }
 
-  function removeNote(id: string) {
+  const remove = (id: string) =>
     setNotes((prev) => prev.filter((n) => n.id !== id))
-  }
+  const update = (id: string, patch: Partial<Note>) =>
+    setNotes((prev) => prev.map((n) => (n.id === id ? { ...n, ...patch } : n)))
 
   return (
     <section className="view">
@@ -67,20 +67,13 @@ export function NotesView({ notes, setNotes }: Props) {
         {notes.length === 0 && (
           <li className="empty">Your notes will appear here.</li>
         )}
-        {notes.map((note) => (
-          <li key={note.id} className="note">
-            <div className="note-body">
-              <p className="note-text">{note.text}</p>
-              <time className="note-time">{formatDate(note.updatedAt)}</time>
-            </div>
-            <button
-              className="icon-btn"
-              onClick={() => removeNote(note.id)}
-              aria-label="Delete note"
-            >
-              ×
-            </button>
-          </li>
+        {sorted.map((note) => (
+          <NoteItem
+            key={note.id}
+            note={note}
+            onDelete={remove}
+            onUpdate={update}
+          />
         ))}
       </ul>
     </section>
