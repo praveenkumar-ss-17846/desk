@@ -48,6 +48,23 @@ export function formatDue(dueAt: number): { label: string; tone: DueTone } {
   }
 }
 
+// Advances a base time by one repeat interval, looping until it lands in the
+// future so a completed recurring task is never scheduled in the past.
+export function nextOccurrence(
+  base: number,
+  repeat: 'daily' | 'weekly' | 'monthly',
+): number {
+  const d = new Date(base)
+  const step = () => {
+    if (repeat === 'daily') d.setDate(d.getDate() + 1)
+    else if (repeat === 'weekly') d.setDate(d.getDate() + 7)
+    else d.setMonth(d.getMonth() + 1)
+  }
+  step()
+  while (d.getTime() <= Date.now()) step()
+  return d.getTime()
+}
+
 export function formatTimestamp(ts: number): string {
   return new Date(ts).toLocaleDateString(undefined, {
     month: 'short',

@@ -8,6 +8,7 @@ import { HomeView } from './views/HomeView'
 import { TasksView } from './views/TasksView'
 import { NotesView } from './views/NotesView'
 import { SearchView } from './views/SearchView'
+import { SettingsView } from './views/SettingsView'
 
 function App() {
   const [tab, setTab] = useLocalStorage<Tab>('desk.assistant.tab', 'home')
@@ -20,14 +21,24 @@ function App() {
     <div className="app">
       <div className="topbar">
         <span className="brand">Assistant</span>
-        <button
-          className="icon-btn"
-          onClick={toggle}
-          aria-label="Toggle theme"
-          title="Toggle light / dark"
-        >
-          {theme === 'dark' ? '☀' : '☾'}
-        </button>
+        <div className="topbar-actions">
+          <button
+            className="icon-btn"
+            onClick={toggle}
+            aria-label="Toggle theme"
+            title="Toggle light / dark"
+          >
+            {theme === 'dark' ? '☀' : '☾'}
+          </button>
+          <button
+            className={`icon-btn ${tab === 'settings' ? 'active' : ''}`}
+            onClick={() => setTab('settings')}
+            aria-label="Settings"
+            title="Settings"
+          >
+            ⚙
+          </button>
+        </div>
       </div>
 
       <main className="content">
@@ -40,6 +51,14 @@ function App() {
         {tab === 'notes' && <NotesView notes={notes} setNotes={setNotes} />}
         {tab === 'search' && (
           <SearchView
+            tasks={tasks}
+            notes={notes}
+            setTasks={setTasks}
+            setNotes={setNotes}
+          />
+        )}
+        {tab === 'settings' && (
+          <SettingsView
             tasks={tasks}
             notes={notes}
             setTasks={setTasks}

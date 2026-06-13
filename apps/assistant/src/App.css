@@ -22,6 +22,11 @@
   letter-spacing: -0.2px;
 }
 
+.topbar-actions {
+  display: flex;
+  gap: 4px;
+}
+
 /* ---- Content / views ---- */
 .content {
   flex: 1;
@@ -122,6 +127,18 @@
   flex: 1;
   min-width: 0;
   color-scheme: light dark;
+}
+
+.composer-select {
+  flex: 1;
+  min-width: 0;
+  cursor: pointer;
+}
+
+.composer-btn-wide.ghost {
+  background: transparent;
+  color: var(--accent);
+  border: 1px solid var(--accent);
 }
 
 .composer-column {
@@ -242,14 +259,89 @@
   color: var(--text-dim);
 }
 
+.task-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
 /* Due-date pill */
 .due {
-  align-self: flex-start;
   font-size: 12px;
   font-weight: 600;
   padding: 2px 8px;
   border-radius: 999px;
   background: var(--surface-2);
+  color: var(--text-dim);
+}
+
+/* Generic small pill (repeat, tag) */
+.chip {
+  font-size: 12px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--surface-2);
+  color: var(--text-dim);
+}
+
+/* Tag filter row */
+.chips-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.filter-chip {
+  border: 1px solid var(--surface-2);
+  background: var(--surface);
+  color: var(--text-dim);
+  font-size: 13px;
+  font-weight: 600;
+  padding: 6px 12px;
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.filter-chip.active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+
+/* ---- Settings ---- */
+.setting-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px 0;
+  border-bottom: 1px solid var(--surface-2);
+}
+
+.setting-title {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.setting-desc {
+  margin: 2px 0 0;
+  font-size: 13px;
+  color: var(--text-dim);
+}
+
+.setting-status {
+  margin: 14px 0 0;
+  font-size: 14px;
+  color: var(--accent);
+}
+
+.setting-footnote {
+  margin-top: 24px;
+  text-align: center;
+  font-size: 12px;
   color: var(--text-dim);
 }
 

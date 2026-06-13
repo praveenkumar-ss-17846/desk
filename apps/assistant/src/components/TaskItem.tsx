@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import type { Task } from '../types'
+import type { Repeat, Task } from '../types'
 import { formatDue, fromInputValue, toInputValue } from '../lib/date'
 
 type Props = {
@@ -9,15 +9,29 @@ type Props = {
   onUpdate: (id: string, patch: Partial<Task>) => void
 }
 
+const REPEAT_LABEL: Record<Repeat, string> = {
+  none: '',
+  daily: 'Daily',
+  weekly: 'Weekly',
+  monthly: 'Monthly',
+}
+
 export function TaskItem({ task, onToggle, onDelete, onUpdate }: Props) {
   const [editing, setEditing] = useState(false)
   const [text, setText] = useState(task.text)
   const [due, setDue] = useState(toInputValue(task.dueAt))
+  const [repeat, setRepeat] = useState<Repeat>(task.repeat ?? 'none')
+  const [tag, setTag] = useState(task.tag ?? '')
 
   function save() {
     const trimmed = text.trim()
     if (!trimmed) return
-    onUpdate(task.id, { text: trimmed, dueAt: fromInputValue(due) })
+    onUpdate(task.id, {
+      text: trimmed,
+      dueAt: fromInputValue(due),
+      repeat,
+      tag: tag.trim() || undefined,
+    })
     setEditing(false)
   }
 
@@ -45,6 +59,26 @@ export function TaskItem({ task, onToggle, onDelete, onUpdate }: Props) {
             onChange={(e) => setDue(e.target.value)}
             aria-label="Due date"
           />
+          <div className="composer-row">
+            <select
+              className="composer-input composer-select"
+              value={repeat}
+              onChange={(e) => setRepeat(e.target.value as Repeat)}
+              aria-label="Repeat"
+            >
+              <option value="none">No repeat</option>
+              <option value="daily">Daily</option>
+              <option value="weekly">Weekly</option>
+              <option value="monthly">Monthly</option>
+            </select>
+            <input
+              className="composer-input"
+              value={tag}
+              onChange={(e) => setTag(e.target.value)}
+              placeholder="Tag (optional)"
+              aria-label="Tag"
+            />
+          </div>
           <div className="edit-actions">
             <button
               type="button"
@@ -63,6 +97,7 @@ export function TaskItem({ task, onToggle, onDelete, onUpdate }: Props) {
   }
 
   const due_ = task.dueAt ? formatDue(task.dueAt) : null
+  const repeats = task.repeat && task.repeat !== 'none'
 
   return (
     <li className={`task ${task.done ? 'done' : ''}`}>
@@ -74,9 +109,13 @@ export function TaskItem({ task, onToggle, onDelete, onUpdate }: Props) {
         />
         <span className="task-main">
           <span className="task-text">{task.text}</span>
-          {due_ && !task.done && (
-            <span className={`due due-${due_.tone}`}>{due_.label}</span>
-          )}
+          <span className="task-meta">
+            {due_ && !task.done && (
+              <span className={`due due-${due_.tone}`}>{due_.label}</span>
+            )}
+            {repeats && <span className="chip">↻ {REPEAT_LABEL[task.repeat!]}</span>}
+            {task.tag && <span className="chip">#{task.tag}</span>}
+          </span>
         </span>
       </label>
       <button

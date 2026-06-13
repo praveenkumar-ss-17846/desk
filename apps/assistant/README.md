@@ -34,11 +34,15 @@ npm run icons    # regenerate PNG app icons from public/favicon.svg
 - **Home** — time-aware greeting, today's date, summary cards
 - **Tasks** — add / edit / complete / delete, optional due dates, smart
   sorting (soonest due first, completed last), colour-coded due pills
+- **Recurring tasks** — daily / weekly / monthly; completing one reschedules
+  it to the next occurrence instead of marking it done
+- **Tags** — label tasks and filter the list by tag
 - **Reminders** — local notifications fire when a task's due time passes
   while the app is open (on iPhone this requires the installed PWA on
   iOS 16.4+; background-while-closed needs a push server we don't have yet)
 - **Notes** — add / edit / delete, pin notes to the top
 - **Search** — find across tasks and notes from one place
+- **Settings** — light / dark theme, and export / import your data as JSON
 - **Light / dark theme** toggle, persisted
 - Everything persists locally (`localStorage`) and works offline
 - Installable, full-screen, iOS-safe-area aware
