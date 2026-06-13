@@ -1,112 +1,41 @@
-import { useEffect, useState } from 'react'
 import './App.css'
-
-type Task = {
-  id: string
-  text: string
-  done: boolean
-  createdAt: number
-}
-
-const STORAGE_KEY = 'desk.assistant.tasks'
-
-function loadTasks(): Task[] {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY)
-    return raw ? (JSON.parse(raw) as Task[]) : []
-  } catch {
-    return []
-  }
-}
+import { useLocalStorage } from './lib/useLocalStorage'
+import { useTheme } from './lib/useTheme'
+import type { Note, Tab, Task } from './types'
+import { BottomNav } from './components/BottomNav'
+import { HomeView } from './views/HomeView'
+import { TasksView } from './views/TasksView'
+import { NotesView } from './views/NotesView'
 
 function App() {
-  const [tasks, setTasks] = useState<Task[]>(loadTasks)
-  const [draft, setDraft] = useState('')
-
-  // Persist on every change so the app works fully offline.
-  useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks))
-  }, [tasks])
-
-  function addTask() {
-    const text = draft.trim()
-    if (!text) return
-    setTasks((prev) => [
-      { id: crypto.randomUUID(), text, done: false, createdAt: Date.now() },
-      ...prev,
-    ])
-    setDraft('')
-  }
-
-  function toggleTask(id: string) {
-    setTasks((prev) =>
-      prev.map((t) => (t.id === id ? { ...t, done: !t.done } : t)),
-    )
-  }
-
-  function removeTask(id: string) {
-    setTasks((prev) => prev.filter((t) => t.id !== id))
-  }
-
-  const remaining = tasks.filter((t) => !t.done).length
+  const [tab, setTab] = useLocalStorage<Tab>('desk.assistant.tab', 'home')
+  const [tasks, setTasks] = useLocalStorage<Task[]>('desk.assistant.tasks', [])
+  const [notes, setNotes] = useLocalStorage<Note[]>('desk.assistant.notes', [])
+  const { theme, toggle } = useTheme()
 
   return (
     <div className="app">
-      <header className="header">
-        <h1>Assistant</h1>
-        <p className="subtitle">
-          {remaining === 0
-            ? 'All clear — nice work.'
-            : `${remaining} task${remaining === 1 ? '' : 's'} to go`}
-        </p>
-      </header>
-
-      <form
-        className="composer"
-        onSubmit={(e) => {
-          e.preventDefault()
-          addTask()
-        }}
-      >
-        <input
-          className="composer-input"
-          value={draft}
-          onChange={(e) => setDraft(e.target.value)}
-          placeholder="Add a task…"
-          aria-label="New task"
-          autoComplete="off"
-        />
-        <button className="composer-btn" type="submit" aria-label="Add task">
-          +
+      <div className="topbar">
+        <span className="brand">Assistant</span>
+        <button
+          className="icon-btn"
+          onClick={toggle}
+          aria-label="Toggle theme"
+          title="Toggle light / dark"
+        >
+          {theme === 'dark' ? '☀' : '☾'}
         </button>
-      </form>
+      </div>
 
-      <ul className="tasks">
-        {tasks.length === 0 && (
-          <li className="empty">Nothing here yet. Add your first task above.</li>
+      <main className="content">
+        {tab === 'home' && (
+          <HomeView tasks={tasks} notes={notes} onNavigate={setTab} />
         )}
-        {tasks.map((task) => (
-          <li key={task.id} className={`task ${task.done ? 'done' : ''}`}>
-            <label className="task-label">
-              <input
-                type="checkbox"
-                checked={task.done}
-                onChange={() => toggleTask(task.id)}
-              />
-              <span className="task-text">{task.text}</span>
-            </label>
-            <button
-              className="task-delete"
-              onClick={() => removeTask(task.id)}
-              aria-label="Delete task"
-            >
-              ×
-            </button>
-          </li>
-        ))}
-      </ul>
+        {tab === 'tasks' && <TasksView tasks={tasks} setTasks={setTasks} />}
+        {tab === 'notes' && <NotesView notes={notes} setNotes={setNotes} />}
+      </main>
 
-      <footer className="footer">Desk · personal private cloud</footer>
+      <BottomNav active={tab} onChange={setTab} />
     </div>
   )
 }
