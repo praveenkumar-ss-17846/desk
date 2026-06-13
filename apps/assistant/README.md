@@ -42,7 +42,10 @@ npm run icons    # regenerate PNG app icons from public/favicon.svg
   iOS 16.4+; background-while-closed needs a push server we don't have yet)
 - **Notes** — add / edit / delete, pin notes to the top
 - **Search** — find across tasks and notes from one place
-- **Settings** — light / dark theme, and export / import your data as JSON
+- **Settings** — light / dark theme, export / import data as JSON, and
+  **cloud sync** (back up to the cloud and restore on another device via a
+  private code — requires the [assistant-api](../../services/assistant-api)
+  backend and `VITE_API_URL` to be set)
 - **Light / dark theme** toggle, persisted
 - Everything persists locally (`localStorage`) and works offline
 - Installable, full-screen, iOS-safe-area aware

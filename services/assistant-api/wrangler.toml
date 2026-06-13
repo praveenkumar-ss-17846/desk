@@ -1,0 +1,11 @@
+# Cloudflare Worker configuration for the assistant backend.
+# After running `wrangler d1 create desk-assistant`, paste the printed
+# database_id below (it is not a secret).
+name = "desk-assistant-api"
+main = "src/index.ts"
+compatibility_date = "2024-09-23"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "desk-assistant"
+database_id = "REPLACE_WITH_YOUR_D1_DATABASE_ID"

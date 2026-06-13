@@ -36,6 +36,10 @@ jobs:
           cache-dependency-path: apps/assistant/package-lock.json
       - run: npm ci
       - run: npm run build
+        env:
+          # Set this in repo Settings → Secrets and variables → Actions →
+          # Variables. Leave unset to ship with cloud sync disabled.
+          VITE_API_URL: ${{ vars.VITE_API_URL }}
       - uses: actions/upload-pages-artifact@v3
         with:
           path: apps/assistant/dist
