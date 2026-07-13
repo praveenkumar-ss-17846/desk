@@ -33,3 +33,30 @@ export async function pullSnapshot(code: string): Promise<Snapshot | null> {
   const body = (await res.json()) as { data: Snapshot }
   return body.data
 }
+
+/**
+ * Merge two lists of items by id using last-write-wins on `updatedAt`.
+ * Tombstones (items with `deleted: true`) are kept so deletions on one
+ * device propagate to the others instead of resurrecting.
+ */
+export function mergeById<T extends { id: string; updatedAt?: number }>(
+  a: T[],
+  b: T[],
+): T[] {
+  const byId = new Map<string, T>()
+  for (const item of [...a, ...b]) {
+    const existing = byId.get(item.id)
+    if (!existing || (item.updatedAt ?? 0) >= (existing.updatedAt ?? 0)) {
+      byId.set(item.id, item)
+    }
+  }
+  return [...byId.values()]
+}
+
+/** Merge two full snapshots together. */
+export function mergeSnapshots(a: Snapshot, b: Snapshot): Snapshot {
+  return {
+    tasks: mergeById(a.tasks ?? [], b.tasks ?? []),
+    notes: mergeById(a.notes ?? [], b.notes ?? []),
+  }
+}

@@ -338,6 +338,32 @@
   color: var(--accent);
 }
 
+.sync-pill {
+  flex: 0 0 auto;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: var(--surface-2);
+  color: var(--text-dim);
+  white-space: nowrap;
+}
+
+.sync-synced {
+  background: rgba(52, 199, 89, 0.16);
+  color: #34c759;
+}
+
+.sync-syncing {
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+.sync-error {
+  background: rgba(229, 56, 78, 0.16);
+  color: var(--danger);
+}
+
 .setting-footnote {
   margin-top: 24px;
   text-align: center;

@@ -5,9 +5,11 @@ export type Task = {
   text: string
   done: boolean
   createdAt: number
+  updatedAt?: number
   dueAt?: number
   repeat?: Repeat
   tag?: string
+  deleted?: boolean
 }
 
 export type Note = {
@@ -15,6 +17,7 @@ export type Note = {
   text: string
   updatedAt: number
   pinned?: boolean
+  deleted?: boolean
 }
 
 export type Tab = 'home' | 'tasks' | 'notes' | 'search' | 'settings'

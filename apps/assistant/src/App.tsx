@@ -1,7 +1,10 @@
+import { useMemo } from 'react'
 import './App.css'
 import { useLocalStorage } from './lib/useLocalStorage'
 import { useTheme } from './lib/useTheme'
 import { useReminders } from './lib/useReminders'
+import { useAutoSync } from './lib/useAutoSync'
+import { visible } from './lib/store'
 import type { Note, Tab, Task } from './types'
 import { BottomNav } from './components/BottomNav'
 import { HomeView } from './views/HomeView'
@@ -14,8 +17,15 @@ function App() {
   const [tab, setTab] = useLocalStorage<Tab>('desk.assistant.tab', 'home')
   const [tasks, setTasks] = useLocalStorage<Task[]>('desk.assistant.tasks', [])
   const [notes, setNotes] = useLocalStorage<Note[]>('desk.assistant.notes', [])
+  const [syncCode, setSyncCode] = useLocalStorage<string>(
+    'desk.assistant.synccode',
+    '',
+  )
   const { theme, toggle } = useTheme()
-  const reminders = useReminders(tasks)
+
+  const liveTasks = useMemo(() => visible(tasks), [tasks])
+  const reminders = useReminders(liveTasks)
+  const sync = useAutoSync({ code: syncCode, tasks, notes, setTasks, setNotes })
 
   return (
     <div className="app">
@@ -63,6 +73,9 @@ function App() {
             notes={notes}
             setTasks={setTasks}
             setNotes={setNotes}
+            code={syncCode}
+            setCode={setSyncCode}
+            sync={sync}
           />
         )}
       </main>

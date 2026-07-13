@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react'
 import type { Note } from '../types'
+import { patchItem, softDelete, visible } from '../lib/store'
 import { NoteItem } from '../components/NoteItem'
 
 type Props = {
@@ -15,7 +16,8 @@ function sortNotes(a: Note, b: Note) {
 
 export function NotesView({ notes, setNotes }: Props) {
   const [draft, setDraft] = useState('')
-  const sorted = useMemo(() => [...notes].sort(sortNotes), [notes])
+  const items = useMemo(() => visible(notes), [notes])
+  const sorted = useMemo(() => [...items].sort(sortNotes), [items])
 
   function addNote() {
     const text = draft.trim()
@@ -27,19 +29,18 @@ export function NotesView({ notes, setNotes }: Props) {
     setDraft('')
   }
 
-  const remove = (id: string) =>
-    setNotes((prev) => prev.filter((n) => n.id !== id))
+  const remove = (id: string) => setNotes((prev) => softDelete(prev, id))
   const update = (id: string, patch: Partial<Note>) =>
-    setNotes((prev) => prev.map((n) => (n.id === id ? { ...n, ...patch } : n)))
+    setNotes((prev) => patchItem(prev, id, patch))
 
   return (
     <section className="view">
       <header className="view-header">
         <h1>Notes</h1>
         <p className="subtitle">
-          {notes.length === 0
+          {items.length === 0
             ? 'Jot anything down.'
-            : `${notes.length} note${notes.length === 1 ? '' : 's'}`}
+            : `${items.length} note${items.length === 1 ? '' : 's'}`}
         </p>
       </header>
 
@@ -64,7 +65,7 @@ export function NotesView({ notes, setNotes }: Props) {
       </form>
 
       <ul className="list">
-        {notes.length === 0 && (
+        {items.length === 0 && (
           <li className="empty">Your notes will appear here.</li>
         )}
         {sorted.map((note) => (

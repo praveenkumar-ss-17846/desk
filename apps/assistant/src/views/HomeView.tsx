@@ -1,4 +1,5 @@
 import type { Note, Tab, Task } from '../types'
+import { visible } from '../lib/store'
 
 type Props = {
   tasks: Task[]
@@ -14,7 +15,9 @@ function greeting(hour: number) {
 
 export function HomeView({ tasks, notes, onNavigate }: Props) {
   const now = new Date()
-  const remaining = tasks.filter((t) => !t.done).length
+  const openTasks = visible(tasks)
+  const noteCount = visible(notes).length
+  const remaining = openTasks.filter((t) => !t.done).length
   const today = now.toLocaleDateString(undefined, {
     weekday: 'long',
     month: 'long',
@@ -39,7 +42,7 @@ export function HomeView({ tasks, notes, onNavigate }: Props) {
           <span className="card-label">Open tasks</span>
         </button>
         <button className="card" onClick={() => onNavigate('notes')}>
-          <span className="card-num">{notes.length}</span>
+          <span className="card-num">{noteCount}</span>
           <span className="card-label">Notes</span>
         </button>
       </div>

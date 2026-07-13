@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react'
 import type { Note, Task } from '../types'
+import { patchItem, softDelete, visible } from '../lib/store'
 import { TaskItem } from '../components/TaskItem'
 import { NoteItem } from '../components/NoteItem'
 
@@ -15,27 +16,29 @@ export function SearchView({ tasks, notes, setTasks, setNotes }: Props) {
   const q = query.trim().toLowerCase()
 
   const matchedTasks = useMemo(
-    () => (q ? tasks.filter((t) => t.text.toLowerCase().includes(q)) : []),
+    () =>
+      q ? visible(tasks).filter((t) => t.text.toLowerCase().includes(q)) : [],
     [tasks, q],
   )
   const matchedNotes = useMemo(
-    () => (q ? notes.filter((n) => n.text.toLowerCase().includes(q)) : []),
+    () =>
+      q ? visible(notes).filter((n) => n.text.toLowerCase().includes(q)) : [],
     [notes, q],
   )
 
   const toggleTask = (id: string) =>
     setTasks((prev) =>
-      prev.map((t) => (t.id === id ? { ...t, done: !t.done } : t)),
+      prev.map((t) =>
+        t.id === id ? { ...t, done: !t.done, updatedAt: Date.now() } : t,
+      ),
     )
-  const removeTask = (id: string) =>
-    setTasks((prev) => prev.filter((t) => t.id !== id))
+  const removeTask = (id: string) => setTasks((prev) => softDelete(prev, id))
   const updateTask = (id: string, patch: Partial<Task>) =>
-    setTasks((prev) => prev.map((t) => (t.id === id ? { ...t, ...patch } : t)))
+    setTasks((prev) => patchItem(prev, id, patch))
 
-  const removeNote = (id: string) =>
-    setNotes((prev) => prev.filter((n) => n.id !== id))
+  const removeNote = (id: string) => setNotes((prev) => softDelete(prev, id))
   const updateNote = (id: string, patch: Partial<Note>) =>
-    setNotes((prev) => prev.map((n) => (n.id === id ? { ...n, ...patch } : n)))
+    setNotes((prev) => patchItem(prev, id, patch))
 
   const nothing = q && matchedTasks.length === 0 && matchedNotes.length === 0
 

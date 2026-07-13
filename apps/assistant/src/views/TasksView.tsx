@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
 import type { Repeat, Task } from '../types'
 import { fromInputValue, nextOccurrence } from '../lib/date'
+import { patchItem, softDelete, visible } from '../lib/store'
 import { TaskItem } from '../components/TaskItem'
 
 type Props = {
@@ -31,29 +32,32 @@ export function TasksView({ tasks, setTasks, reminders }: Props) {
   const [tag, setTag] = useState('')
   const [filter, setFilter] = useState<string>(ALL)
 
+  const items = useMemo(() => visible(tasks), [tasks])
   const tags = useMemo(
-    () => [...new Set(tasks.map((t) => t.tag).filter(Boolean) as string[])].sort(),
-    [tasks],
+    () => [...new Set(items.map((t) => t.tag).filter(Boolean) as string[])].sort(),
+    [items],
   )
   const sorted = useMemo(
     () =>
-      [...tasks]
+      [...items]
         .filter((t) => filter === ALL || t.tag === filter)
         .sort(sortTasks),
-    [tasks, filter],
+    [items, filter],
   )
-  const remaining = tasks.filter((t) => !t.done).length
-  const hasDueDates = tasks.some((t) => t.dueAt && !t.done)
+  const remaining = items.filter((t) => !t.done).length
+  const hasDueDates = items.some((t) => t.dueAt && !t.done)
 
   function addTask() {
     const text = draft.trim()
     if (!text) return
+    const ts = Date.now()
     setTasks((prev) => [
       {
         id: crypto.randomUUID(),
         text,
         done: false,
-        createdAt: Date.now(),
+        createdAt: ts,
+        updatedAt: ts,
         dueAt: fromInputValue(due),
         repeat,
         tag: tag.trim() || undefined,
@@ -72,24 +76,27 @@ export function TasksView({ tasks, setTasks, reminders }: Props) {
       prev.map((t) => {
         if (t.id !== id) return t
         if (!t.done && t.repeat && t.repeat !== 'none') {
-          return { ...t, dueAt: nextOccurrence(t.dueAt ?? Date.now(), t.repeat) }
+          return {
+            ...t,
+            dueAt: nextOccurrence(t.dueAt ?? Date.now(), t.repeat),
+            updatedAt: Date.now(),
+          }
         }
-        return { ...t, done: !t.done }
+        return { ...t, done: !t.done, updatedAt: Date.now() }
       }),
     )
   }
 
-  const remove = (id: string) =>
-    setTasks((prev) => prev.filter((t) => t.id !== id))
+  const remove = (id: string) => setTasks((prev) => softDelete(prev, id))
   const update = (id: string, patch: Partial<Task>) =>
-    setTasks((prev) => prev.map((t) => (t.id === id ? { ...t, ...patch } : t)))
+    setTasks((prev) => patchItem(prev, id, patch))
 
   return (
     <section className="view">
       <header className="view-header">
         <h1>Tasks</h1>
         <p className="subtitle">
-          {tasks.length === 0
+          {items.length === 0
             ? 'Nothing yet.'
             : remaining === 0
               ? 'All clear — nice work.'
@@ -176,7 +183,7 @@ export function TasksView({ tasks, setTasks, reminders }: Props) {
       <ul className="list">
         {sorted.length === 0 && (
           <li className="empty">
-            {tasks.length === 0
+            {items.length === 0
               ? 'Add your first task above.'
               : 'No tasks with this tag.'}
           </li>
