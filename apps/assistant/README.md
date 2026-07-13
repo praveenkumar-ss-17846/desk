@@ -37,9 +37,10 @@ npm run icons    # regenerate PNG app icons from public/favicon.svg
 - **Recurring tasks** — daily / weekly / monthly; completing one reschedules
   it to the next occurrence instead of marking it done
 - **Tags** — label tasks and filter the list by tag
-- **Reminders** — local notifications fire when a task's due time passes
-  while the app is open (on iPhone this requires the installed PWA on
-  iOS 16.4+; background-while-closed needs a push server we don't have yet)
+- **Background reminders** — Web Push notifications fire at a task's due time
+  even when the app is closed, via a scheduled job on the backend. Falls back
+  to in-app notifications where Web Push isn't supported. (On iPhone, requires
+  the installed PWA on iOS 16.4+ and notification permission.)
 - **Notes** — add / edit / delete, pin notes to the top
 - **Search** — find across tasks and notes from one place
 - **Automatic cloud sync** — changes sync silently across devices sharing a

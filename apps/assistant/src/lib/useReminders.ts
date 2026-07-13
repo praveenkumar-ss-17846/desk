@@ -1,50 +1,73 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import type { Task } from '../types'
+import { pushSupported, registerReminders, upcomingReminders } from './push'
 import { useLocalStorage } from './useLocalStorage'
 
-const supported = typeof Notification !== 'undefined'
-
+const notifSupported = typeof Notification !== 'undefined'
 type Permission = NotificationPermission | 'unsupported'
 
-async function showNotification(title: string, body: string) {
-  if (!supported || Notification.permission !== 'granted') return
+async function showLocalNotification(title: string, body: string) {
+  if (!notifSupported || Notification.permission !== 'granted') return
   try {
-    // On installed iOS PWAs notifications must go through the service worker.
     const reg = await navigator.serviceWorker?.ready
     if (reg?.showNotification) {
-      await reg.showNotification(title, { body, tag: title + body })
+      await reg.showNotification(title, { body })
       return
     }
   } catch {
-    // fall through to the constructor below
+    // fall through
   }
   try {
     new Notification(title, { body })
   } catch {
-    // notifications unavailable in this context — ignore
+    // ignore
   }
 }
 
-// Fires a local notification when a task's due time passes while the app is
-// open. Without a push server we can't deliver reminders while the app is
-// fully closed, but this covers the common "app on screen / backgrounded" case.
+const PUSH_DEBOUNCE = 2000
+
+/**
+ * Task reminders. When the browser supports Web Push (installed iOS PWA,
+ * Chrome, etc.) we register the upcoming reminders with the backend, which
+ * pushes a notification at the due time even if the app is closed. Otherwise
+ * we fall back to firing a notification while the app is open.
+ */
 export function useReminders(tasks: Task[]) {
   const [permission, setPermission] = useState<Permission>(
-    supported ? Notification.permission : 'unsupported',
+    notifSupported ? Notification.permission : 'unsupported',
   )
   const [reminded, setReminded] = useLocalStorage<string[]>(
     'desk.assistant.reminded',
     [],
   )
+  const pushTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
 
   const requestPermission = useCallback(async () => {
-    if (!supported) return
+    if (!notifSupported) return
     const result = await Notification.requestPermission()
     setPermission(result)
-  }, [])
+    if (result === 'granted' && pushSupported) {
+      try {
+        await registerReminders(upcomingReminders(tasks))
+      } catch {
+        // will retry on next change
+      }
+    }
+  }, [tasks])
 
+  // Push path: keep the server's reminder list in sync with our tasks.
   useEffect(() => {
-    if (permission !== 'granted') return
+    if (permission !== 'granted' || !pushSupported) return
+    clearTimeout(pushTimer.current)
+    pushTimer.current = setTimeout(() => {
+      registerReminders(upcomingReminders(tasks)).catch(() => {})
+    }, PUSH_DEBOUNCE)
+    return () => clearTimeout(pushTimer.current)
+  }, [permission, tasks])
+
+  // Fallback path (no push support): notify for tasks that come due while open.
+  useEffect(() => {
+    if (permission !== 'granted' || pushSupported) return
 
     const check = () => {
       const now = Date.now()
@@ -52,11 +75,10 @@ export function useReminders(tasks: Task[]) {
         (t) => !t.done && t.dueAt && t.dueAt <= now && !reminded.includes(t.id),
       )
       if (due.length === 0) return
-      due.forEach((t) => void showNotification('Task due', t.text))
+      due.forEach((t) => void showLocalNotification('Task due', t.text))
       setReminded((prev) => [...prev, ...due.map((t) => t.id)])
     }
 
-    check()
     const id = window.setInterval(check, 30_000)
     return () => window.clearInterval(id)
   }, [permission, tasks, reminded, setReminded])

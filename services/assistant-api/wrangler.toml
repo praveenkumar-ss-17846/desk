@@ -1,6 +1,4 @@
 # Cloudflare Worker configuration for the assistant backend.
-# After running `wrangler d1 create desk-assistant`, paste the printed
-# database_id below (it is not a secret).
 name = "desk-assistant-api"
 main = "src/index.ts"
 compatibility_date = "2024-09-23"
@@ -8,4 +6,14 @@ compatibility_date = "2024-09-23"
 [[d1_databases]]
 binding = "DB"
 database_name = "desk-assistant"
-database_id = "REPLACE_WITH_YOUR_D1_DATABASE_ID"
+database_id = "a48a5867-21c1-48fa-8785-07bde8ecc43b"
+
+# Public VAPID key + contact subject for Web Push (not secret). The matching
+# private key is stored as a secret: `wrangler secret put VAPID_PRIVATE_KEY`.
+[vars]
+VAPID_PUBLIC_KEY = "BB78jWR4e14GZvqD9kN9TxjDgZ32h5aKClpFy9VfVIpEJ4iRbXCnTKjUfZpgSxYtrYlEicKaNNF0b5OquvcfFXY"
+VAPID_SUBJECT = "https://praveenkumar-ss-17846.github.io/desk/"
+
+# Check for due reminders every minute and send push notifications.
+[triggers]
+crontab = ["* * * * *"]

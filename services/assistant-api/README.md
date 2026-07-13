@@ -11,11 +11,30 @@ reminders — without us managing a server.
 
 ## API
 
-| Method | Path            | Purpose                                  |
-| ------ | --------------- | ---------------------------------------- |
-| GET    | `/health`       | Liveness check                           |
-| GET    | `/state/:code`  | Fetch the snapshot stored under `:code`  |
-| PUT    | `/state/:code`  | Save (overwrite) the snapshot for `:code`|
+| Method | Path               | Purpose                                     |
+| ------ | ------------------ | ------------------------------------------- |
+| GET    | `/health`          | Liveness check                              |
+| GET    | `/state/:code`     | Fetch the snapshot stored under `:code`     |
+| PUT    | `/state/:code`     | Save (overwrite) the snapshot for `:code`   |
+| POST   | `/push/register`   | Store a push subscription + its reminders   |
+| GET    | `/push/pending`    | Reminders that have fired (read by the SW)  |
+| POST   | `/push/ack`        | Clear fired reminders once shown            |
+| POST   | `/push/test`       | Send an immediate test push to an endpoint  |
+
+A cron trigger (every minute) sends a Web Push notification for each reminder
+whose due time has passed. Push uses VAPID: the public key + subject live in
+`wrangler.toml`; the private key is a secret.
+
+### One-time push setup
+
+```bash
+# generate a key pair (do this once)
+npx web-push generate-vapid-keys
+# put the PUBLIC key + a subject in wrangler.toml [vars]; then store the private key:
+npx wrangler secret put VAPID_PRIVATE_KEY   # paste the private key when prompted
+npm run db:init:push                        # create the push tables
+npm run deploy
+```
 
 The sync code is both the id and the password for a snapshot, so keep it
 private. The app generates a long random one for you on first backup.
