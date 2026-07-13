@@ -16,7 +16,17 @@ const app = new Hono<{ Bindings: Bindings }>()
 // Allow the PWA (served from GitHub Pages or anywhere) to call the API.
 app.use('*', cors({ origin: '*', allowMethods: ['GET', 'PUT', 'OPTIONS'] }))
 
-app.get('/health', (c) => c.json({ ok: true, service: 'assistant-api' }))
+// Return errors as JSON *with* the CORS header, so the browser can read the
+// real message instead of reporting a generic "Failed to fetch / Load failed".
+app.onError((err, c) =>
+  c.json({ error: err.message || String(err) }, 500, {
+    'Access-Control-Allow-Origin': '*',
+  }),
+)
+
+app.get('/health', (c) =>
+  c.json({ ok: true, service: 'assistant-api', db: !!c.env.DB }),
+)
 
 // Pull the latest snapshot for a code.
 app.get('/state/:code', async (c) => {
