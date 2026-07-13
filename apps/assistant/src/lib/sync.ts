@@ -1,8 +1,9 @@
 import type { Note, Task } from '../types'
 
-// The backend base URL is baked in at build time via VITE_API_URL.
-// When it is unset, cloud sync is simply turned off in the UI.
-const API = import.meta.env.VITE_API_URL?.replace(/\/$/, '') ?? ''
+// The backend base URL. Defaults to the deployed Cloudflare Worker; can be
+// overridden at build time with VITE_API_URL (e.g. for a staging backend).
+const DEFAULT_API = 'https://desk-assistant-api.praveen-desk.workers.dev'
+const API = (import.meta.env.VITE_API_URL || DEFAULT_API).replace(/\/$/, '')
 
 export const syncEnabled = API.length > 0
 
