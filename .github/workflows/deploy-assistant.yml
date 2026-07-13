@@ -5,7 +5,7 @@ name: Deploy assistant (PWA)
 
 on:
   push:
-    branches: [main]
+    branches: [claude/repo-structure-overview-usHOw]
     paths:
       - 'apps/assistant/**'
       - '.github/workflows/deploy-assistant.yml'
@@ -29,6 +29,11 @@ jobs:
         working-directory: apps/assistant
     steps:
       - uses: actions/checkout@v4
+      # Enables GitHub Pages automatically (no manual Settings toggle needed),
+      # as long as Pages is available for this repo (public, or a paid plan).
+      - uses: actions/configure-pages@v5
+        with:
+          enablement: true
       - uses: actions/setup-node@v4
         with:
           node-version: 22
