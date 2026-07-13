@@ -7,7 +7,8 @@
     "dev": "wrangler dev",
     "deploy": "wrangler deploy",
     "typecheck": "tsc --noEmit",
-    "db:init": "wrangler d1 execute desk-assistant --file=./migrations/0001_init.sql"
+    "db:init": "wrangler d1 execute desk-assistant --remote --file=./migrations/0001_init.sql",
+    "db:init:local": "wrangler d1 execute desk-assistant --local --file=./migrations/0001_init.sql"
   },
   "dependencies": {
     "hono": "^4.6.3"
